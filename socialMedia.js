@@ -1,6 +1,7 @@
 const express = require("express");
 const axios = require('axios');
 const app = express();
+const PORT = process.env.PORT || 8085;
 
 var https = require('https');
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
@@ -25,7 +26,7 @@ process.on('uncaughtException', error => {
     console.log('uncaughtException', error);
 });
 
-let server = app.listen(3000, function () {
+let server = app.listen(PORT, function () {
     let host = server.address().address;
-    console.log('Server listening at http://%s:%s', host, 3000);
+    console.log('Server listening at http://%s:%s', host, PORT);
 });
