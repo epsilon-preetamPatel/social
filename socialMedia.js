@@ -1,26 +1,3 @@
-const express = require("express");
-const axios = require('axios');
-const app = express();
-const PORT = process.env.PORT || 8085;
-
-var https = require('https');
-const httpsAgent = new https.Agent({ rejectUnauthorized: false });
-var config = {
-    httpsAgent: httpsAgent,
-    headers: {
-        'Content-Type': 'application/json'
-    }
-};
-
-app.get('/', function (req, res, next) {
-    res.send('server working');
-});
-
-app.get('/webhook', function (req, res, next) {
-    config.url = 'https://social-integration-epsilon.herokuapp.com/webhooks?hub.mode=subscribe&hub.challenge=1158201444&hub.verify_token=meatyhamhock';
-    config.method = 'get';
-    axios(config).then(function (response) { }).catch(function (error) { });
-});
 /**
  * Copyright 2021-present, Facebook, Inc. All rights reserved.
  *
@@ -53,8 +30,8 @@ const
     request = require('request'),
     express = require('express'),
     { urlencoded, json } = require('body-parser'),
-    app = express(),
-    PORT = process.env.PORT || 8085;
+    app = express();
+const PORT = process.env.PORT || 8085;
 
 // Parse application/x-www-form-urlencoded
 app.use(urlencoded({ extended: true }));
@@ -228,13 +205,4 @@ function callSendAPI(senderPsid, response) {
 // listen for requests :)
 let listener = app.listen(PORT, function () {
     console.log('Your app is listening on port ' + listener.address().port);
-});
-
-process.on('uncaughtException', error => {
-    console.log('uncaughtException', error);
-});
-
-let server = app.listen(PORT, function () {
-    let host = server.address().address;
-    console.log('Server listening at http://%s:%s', host, PORT);
 });
