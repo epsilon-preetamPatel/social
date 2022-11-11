@@ -1,37 +1,20 @@
-/**
- * Copyright 2021-present, Facebook, Inc. All rights reserved.
- *
- * This source code is licensed under the license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * Messenger Platform Quick Start Tutorial
- *
- * This is the completed code for the Messenger Platform quick start tutorial
- *
- * https://developers.facebook.com/docs/messenger-platform/getting-started/quick-start/
- *
- * To run this code, you must do the following:
- *
- * 1. Deploy this code to a server running Node.js
- * 2. Run `yarn install`
- * 3. Add your VERIFY_TOKEN and PAGE_ACCESS_TOKEN to your environment vars
- */
 
 'use strict';
-
-// Use dotenv to read .env vars into Node
 require('dotenv').config();
-// let dotenv = require("dotenv")
-// let path = `${__dirname}/.env`;
-// let environmentDetails = dotenv.config({path}).parsed;
 
-// Imports dependencies and set up http server
-const
-    request = require('request'),
-    express = require('express'),
-    { urlencoded, json } = require('body-parser'),
-    app = express();
+const request = require('request')
+const express = require('express')
+const { urlencoded, json } = require('body-parser')
+const app = express();
 const PORT = process.env.PORT || 8085;
+const bodyParser = require('body-parser');
+const xhub = require('express-x-hub');
+
+app.use(xhub({ algorithm: 'sha1', secret: process.env.APP_SECRET }));
+app.use(bodyParser.json());
+
+const token = process.env.TOKEN || 'token';
+const received_updates = [];
 
 // Parse application/x-www-form-urlencoded
 app.use(urlencoded({ extended: true }));
@@ -41,7 +24,8 @@ app.use(json());
 
 // Respond with 'Hello World' when a GET request is made to the homepage
 app.get('/', function (_req, res) {
-    res.send('Hello World');
+    console.log(req);
+    res.send('<pre>' + JSON.stringify(received_updates, null, 2) + '</pre>');
 });
 
 // Adds support for GET requests to our webhook
@@ -201,6 +185,41 @@ function callSendAPI(senderPsid, response) {
         }
     });
 }
+
+//facebook instegram webhook
+app.get(['/facebook', '/instagram'], function (req, res) {
+    if (
+        req.query['hub.mode'] == 'subscribe' &&
+        req.query['hub.verify_token'] == token
+    ) {
+        res.send(req.query['hub.challenge']);
+    } else {
+        res.sendStatus(400);
+    }
+});
+
+app.post('/facebook', function (req, res) {
+    console.log('Facebook request body:', req.body);
+
+    if (!req.isXHubValid()) {
+        console.log('Warning - request header X-Hub-Signature not present or invalid');
+        res.sendStatus(401);
+        return;
+    }
+
+    console.log('request header X-Hub-Signature validated');
+    // Process the Facebook updates here
+    received_updates.unshift(req.body);
+    res.sendStatus(200);
+});
+
+app.post('/instagram', function (req, res) {
+    console.log('Instagram request body:');
+    console.log(req.body);
+    // Process the Instagram updates here
+    received_updates.unshift(req.body);
+    res.sendStatus(200);
+});
 
 // listen for requests :)
 let listener = app.listen(PORT, function () {
