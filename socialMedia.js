@@ -13,8 +13,8 @@ const xhub = require('express-x-hub');
 app.use(xhub({ algorithm: 'sha1', secret: process.env.APP_SECRET }));
 app.use(bodyParser.json());
 
-const token = process.env.TOKEN || 'token';
-const received_updates = [];
+let token = process.env.TOKEN || 'token';
+let received_updates = [];
 
 // Parse application/x-www-form-urlencoded
 app.use(urlencoded({ extended: true }));
@@ -24,7 +24,7 @@ app.use(json());
 
 // Respond with 'Hello World' when a GET request is made to the homepage
 app.get('/', function (_req, res) {
-    console.log(req);
+    console.log(_req);
     res.send('<pre>' + JSON.stringify(received_updates, null, 2) + '</pre>');
 });
 
